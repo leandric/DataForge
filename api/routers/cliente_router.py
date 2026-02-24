@@ -3,7 +3,7 @@ from typing import Annotated
 from sqlmodel import Session, select, func
 from uuid import UUID
 
-from models.clientes_models import Cliente, ClientePost, ClienteResposta
+from models.clientes_models import Cliente, ClientePost, ClienteResposta, ClientePut, ClientePatch, ConfirmaDelete
 from database.database import get_session  # ajuste o caminho conforme seu projeto
 
 router = APIRouter(prefix="/clientes", tags=["Clientes"])
@@ -54,3 +54,66 @@ def criar(payload: ClientePost, session: SessionDep):
 
     session.refresh(cliente)
     return cliente
+
+@router.put("/{uuid}", response_model=ClienteResposta,
+    responses={
+        404: {"description": "Cliente não encontrado"},
+    },
+)
+def recadastra_cliente(uuid: UUID, cliente_update: ClientePut, session: SessionDep) -> ClienteResposta:
+    cliente = session.exec(select(Cliente).where(Cliente.uuid == uuid)).first()
+    if not cliente:
+        raise HTTPException(status_code=404, detail="Cliente não encontrado")
+
+    dados = cliente_update.model_dump()  # dict com todos os campos do PUT
+    for key, value in dados.items():
+        setattr(cliente, key, value)
+
+    session.add(cliente)
+    session.commit()
+
+
+    session.refresh(cliente)
+    return ClienteResposta.model_validate(cliente)  # response_model faz a serialização
+
+
+@router.patch(
+    "/{uuid}",
+    response_model=ClienteResposta,
+    responses={
+        404: {"description": "Cliente não encontrado"},
+        400: {"description": "Nenhum dado recebido"},
+    },
+)
+def atualiza_cliente(uuid: UUID, cliente_update: ClientePatch, session: SessionDep) -> ClienteResposta:
+    update_data = cliente_update.model_dump(exclude_unset=True, exclude_none=True)
+
+    if not update_data:
+        raise HTTPException(status_code=400, detail="Nenhum dado recebido")
+
+    cliente = session.exec(select(Cliente).where(Cliente.uuid == uuid)).first()
+    if not cliente:
+        raise HTTPException(status_code=404, detail="Cliente não encontrado")
+
+    for key, value in update_data.items():
+        setattr(cliente, key, value)
+
+    session.add(cliente)
+    try:
+        session.commit()
+    except Exception as e:
+        session.rollback()
+        # você pode manter genérico, já que não quer validar/inspecionar CPF
+        raise HTTPException(status_code=400, detail="Erro ao atualizar cliente") from e
+
+    session.refresh(cliente)
+    return cliente
+
+@router.delete("/{uuid}", response_model=ConfirmaDelete, responses={404:{'description':'Cliente não encontrado'}})
+async def deleta_cliente(uuid:UUID, session:SessionDep) -> ConfirmaDelete:
+    if cliente := session.exec(select(Cliente).where(Cliente.uuid == uuid)).first():
+        nome = cliente.nome
+        session.delete(cliente)
+        session.commit()
+        return ConfirmaDelete(mensagem=f"Cliente: {nome} deletado", uuid=uuid)
+    raise HTTPException(status_code=404, detail="Cliente não encontrado")
