@@ -3,6 +3,7 @@ from fastapi import FastAPI
 
 from database.database import criar_db_tabelas
 from routers import cliente_router
+from routers import produtos_router
 
 
 @asynccontextmanager
@@ -19,4 +20,4 @@ app = FastAPI(
 )
 
 app.include_router(cliente_router.router)
- 
+app.include_router(produtos_router.router)

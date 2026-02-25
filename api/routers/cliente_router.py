@@ -4,7 +4,7 @@ from sqlmodel import Session, select, func
 from uuid import UUID
 
 from models.clientes_models import Cliente, ClientePost, ClienteResposta, ClientePut, ClientePatch, ConfirmaDelete
-from database.database import get_session  # ajuste o caminho conforme seu projeto
+from database.database import get_session
 
 router = APIRouter(prefix="/clientes", tags=["Clientes"])
 
