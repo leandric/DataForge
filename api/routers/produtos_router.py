@@ -11,7 +11,7 @@ SessionDep = Annotated[Session, Depends(get_session)]
 
 
 @router.get("/", response_model=list[ProdutoRead])
-def listar(
+async def listar(
     session: SessionDep,
     response: Response,
     page: int = Query(1, ge=1),
@@ -53,7 +53,7 @@ def listar(
     response_model=ProdutoRead,
     responses={404: {"description": "Produto não encontrado"}},
 )
-def buscar_por_id(
+async def buscar_por_id(
     id_produto: int,
     session: SessionDep,
 ) -> ProdutoRead:
@@ -74,7 +74,7 @@ def buscar_por_id(
     response_model=ProdutoRead,
     status_code=status.HTTP_201_CREATED,
 )
-def criar_produto(
+async def criar_produto(
     produto_in: ProdutoCreate,
     session: SessionDep,
 ) -> ProdutoRead:
@@ -93,7 +93,7 @@ def criar_produto(
     response_model=ProdutoRead,
     responses={404: {"description": "Produto não encontrado"}},
 )
-def atualizar_produto(
+async def atualizar_produto(
     id_produto: int,
     produto_in: ProdutoCreate,
     session: SessionDep,
@@ -128,7 +128,7 @@ def atualizar_produto(
         400: {"description": "Nenhum dado recebido"},
     },
 )
-def atualizar_parcial(
+async def atualizar_parcial(
     id_produto: int,
     produto_in: ProdutoUpdate,
     session: SessionDep,
@@ -157,7 +157,7 @@ def atualizar_parcial(
     status_code=status.HTTP_204_NO_CONTENT,
     responses={404: {"description": "Produto não encontrado"}},
 )
-def deletar_produto(
+async def deletar_produto(
     id_produto: int,
     session: SessionDep,
 ) -> None:

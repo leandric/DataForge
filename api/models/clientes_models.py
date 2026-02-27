@@ -4,7 +4,8 @@ from datetime import date, datetime
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel
-from sqlmodel import SQLModel, Field
+from sqlmodel import SQLModel, Field, Relationship
+from typing import List
 
 
 class ClienteBase(SQLModel):
@@ -29,6 +30,9 @@ class ClienteBase(SQLModel):
 
 class Cliente(ClienteBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
+    # uuid...
+
+    vendas: List["Venda"] = Relationship(back_populates="cliente")
 
     uuid: UUID = Field(
         default_factory=uuid4,
