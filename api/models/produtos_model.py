@@ -1,9 +1,8 @@
-from __future__ import annotations
-
+from typing import List, Optional
+from typing import List
 from datetime import datetime
 from decimal import Decimal
 from sqlmodel import SQLModel, Field, Relationship
-from typing import List
 
 
 class ProdutoBase(SQLModel):
@@ -14,7 +13,7 @@ class ProdutoBase(SQLModel):
 
 
 class Produto(ProdutoBase, table=True):
-    id_produto: int | None = Field(default=None, primary_key=True)
+    id_produto: Optional[int] | None = Field(default=None, primary_key=True)
 
     vendas: List["Venda"] = Relationship(back_populates="produto")
 

@@ -1,35 +1,28 @@
-from __future__ import annotations
-
 from datetime import datetime
 from decimal import Decimal
+from typing import Optional
 from sqlmodel import SQLModel, Field, Relationship
 
-
 class VendaBase(SQLModel):
-    # FKs (ajuste os nomes das tabelas conforme seu __tablename__ real)
     id_cliente: int = Field(foreign_key="cliente.id", index=True)
     id_produto: int = Field(foreign_key="produto.id_produto", index=True)
     id_loja: int = Field(foreign_key="loja.id_loja", index=True)
 
     data_venda: datetime = Field(index=True)
-
     quantidade: int
     valor_unitario: Decimal = Field(max_digits=10, decimal_places=2)
     valor_total: Decimal = Field(max_digits=12, decimal_places=2)
-
     ano: int = Field(index=True)
     mes: int = Field(index=True)
 
-
 class Venda(VendaBase, table=True):
-    __tablename__ = "vendas"  # troque para o nome real da tabela (ex: fato_vendas)
+    __tablename__ = "vendas"
 
-    id_venda: int | None = Field(default=None, primary_key=True)
+    id_venda: Optional[int] | None = Field(default=None, primary_key=True)
 
-    # Relationships (strings por causa de forward refs)
-    cliente: "Cliente" = Relationship(back_populates="vendas")
-    produto: "Produto" = Relationship(back_populates="vendas")
-    loja: "Loja" = Relationship(back_populates="vendas")
+    cliente: Optional["Cliente"] = Relationship(back_populates="vendas")
+    produto: Optional["Produto"] = Relationship(back_populates="vendas")
+    loja: Optional["Loja"] = Relationship(back_populates="vendas")
 
 
 class VendaCreate(VendaBase):

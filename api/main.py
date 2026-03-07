@@ -1,5 +1,6 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
+import models  # noqa: F401
 
 from database.database import criar_db_tabelas
 from routers import cliente_router
